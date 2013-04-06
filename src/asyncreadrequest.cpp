@@ -1,7 +1,6 @@
 /*
   This file is part of the PhantomJS project from Ofi Labs.
 
-  Copyright (C) 2011 Ivan De Marino <ivan.de.marino@gmail.com>
   Copyright (C) 2013 execjosh, http://execjosh.blogspot.com
 
   Redistribution and use in source and binary forms, with or without
@@ -28,47 +27,52 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#include "asyncreadrequest.h"
 
-#include <QObject>
-#include <QFile>
-#include <QTextCodec>
-#include <QTextStream>
-#include <QVariant>
+#include <QtConcurrentRun>
 
-class File : public QObject
+AsyncReadRequest::AsyncReadRequest(File *file, const QVariant &n, QObject *parent)
+    : QObject(parent)
+    , m_file(file)
+    , m_param(n)
+    , m_data()
 {
-    Q_OBJECT
+}
 
-public:
-    // handle a textfile with given codec
-    // if @p codec is null, the file is considered to be binary
-    File(QFile *openfile, QTextCodec *codec, QObject *parent = 0);
-    virtual ~File();
+// public:
 
-public slots:
-    /**
-     * @param n Number of bytes to read (a negative value means read up to EOF)
-     * NOTE: The use of QVariant here is necessary to catch JavaScript `null`.
-     * @see <a href="http://wiki.commonjs.org/wiki/IO/A#Instance_Methods">IO/A spec</a>
-     */
-    QString read(const QVariant &n = -1);
-    QObject *_getAsyncReadRequest(const QVariant &n = -1);
-    bool write(const QString &data);
+QString AsyncReadRequest::data() const
+{
+    return m_data;
+}
 
-    bool seek(const qint64 pos);
+void AsyncReadRequest::setFile(File &file)
+{
+    m_file = &file;
+}
 
-    QString readLine();
-    bool writeLine(const QString &data);
+// public slots:
 
-    bool atEnd() const;
-    void flush();
-    void close();
+void AsyncReadRequest::read()
+{
+    QtConcurrent::run(this, &AsyncReadRequest::_read);
+}
 
-private:
-    QFile *m_file;
-    QTextStream *m_fileStream;
-};
+void AsyncReadRequest::readLine()
+{
+    QtConcurrent::run(this, &AsyncReadRequest::_readLine);
+}
 
-#endif // FILE_H
+// private slots:
+
+void AsyncReadRequest::_read()
+{
+    m_data = m_file->read(m_param);
+    emit complete();
+}
+
+void AsyncReadRequest::_readLine()
+{
+    m_data = m_file->readLine();
+    emit complete();
+}

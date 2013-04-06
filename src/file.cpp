@@ -32,6 +32,8 @@
 
 #include <QDebug>
 
+#include "asyncreadrequest.h"
+
 // public:
 File::File(QFile *openfile, QTextCodec *codec, QObject *parent) :
     QObject(parent),
@@ -108,6 +110,11 @@ QString File::read(const QVariant &n)
         }
         return ret;
     }
+}
+
+QObject *File::_getAsyncReadRequest(const QVariant &n)
+{
+    return new AsyncReadRequest(this, n, this);
 }
 
 bool File::write(const QString &data)

@@ -27,6 +27,7 @@ HEADERS += csconverter.h \
     encoding.h \
     config.h \
     childprocess.h \
+    asyncreadrequest.h \
     repl.h
 
 SOURCES += phantom.cpp \
@@ -46,6 +47,7 @@ SOURCES += phantom.cpp \
     encoding.cpp \
     config.cpp \
     childprocess.cpp \
+    asyncreadrequest.cpp \
     repl.cpp
 
 OTHER_FILES += \

@@ -1,7 +1,6 @@
 /*
   This file is part of the PhantomJS project from Ofi Labs.
 
-  Copyright (C) 2011 Ivan De Marino <ivan.de.marino@gmail.com>
   Copyright (C) 2013 execjosh, http://execjosh.blogspot.com
 
   Redistribution and use in source and binary forms, with or without
@@ -28,47 +27,53 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef ASYNCREADREQUEST_H
+#define ASYNCREADREQUEST_H
 
 #include <QObject>
-#include <QFile>
-#include <QTextCodec>
-#include <QTextStream>
+#include <QString>
 #include <QVariant>
 
-class File : public QObject
+#include "file.h"
+
+class AsyncReadRequest : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString data READ data)
 
 public:
-    // handle a textfile with given codec
-    // if @p codec is null, the file is considered to be binary
-    File(QFile *openfile, QTextCodec *codec, QObject *parent = 0);
-    virtual ~File();
+    explicit AsyncReadRequest(File *file, const QVariant &n = 1, QObject *parent = 0);
+
+    QString data() const;
+
+signals:
+    void complete();
 
 public slots:
     /**
-     * @param n Number of bytes to read (a negative value means read up to EOF)
-     * NOTE: The use of QVariant here is necessary to catch JavaScript `null`.
-     * @see <a href="http://wiki.commonjs.org/wiki/IO/A#Instance_Methods">IO/A spec</a>
+     * Moves association to a new thread calling `_read`
      */
-    QString read(const QVariant &n = -1);
-    QObject *_getAsyncReadRequest(const QVariant &n = -1);
-    bool write(const QString &data);
+    void read();
+    /**
+     * Moves association to a new thread calling `_readLine`
+     */
+    void readLine();
+    void setFile(File &file);
 
-    bool seek(const qint64 pos);
-
-    QString readLine();
-    bool writeLine(const QString &data);
-
-    bool atEnd() const;
-    void flush();
-    void close();
+private slots:
+    /**
+     * Does the actual read and emits `complete`
+     */
+    void _read();
+    /**
+     * Does the actual readLine and emits `complete`
+     */
+    void _readLine();
 
 private:
-    QFile *m_file;
-    QTextStream *m_fileStream;
+    File *m_file;
+    QVariant m_param;
+    QString m_data;
 };
 
-#endif // FILE_H
+#endif // ASYNCREADREQUEST_H
