@@ -1,8 +1,8 @@
 /*
   This file is part of the PhantomJS project from Ofi Labs.
 
-  Copyright (C) 2012 execjosh, http://execjosh.blogspot.com
-  Copyright (C) 2012 James M. Greene <james.m.greene@gmail.com>
+  Copyright (C) 2011 Ivan De Marino <ivan.de.marino@gmail.com>
+  Copyright (C) 2013 execjosh, http://execjosh.blogspot.com
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -28,61 +28,46 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SYSTEM_H
-#define SYSTEM_H
+#ifndef FILE_H
+#define FILE_H
 
 #include <QObject>
-#include <QStringList>
-#include <QMap>
+#include <QFile>
+#include <QTextCodec>
+#include <QTextStream>
 #include <QVariant>
 
-#include "file.h"
-
-// This class implements the CommonJS System/1.0 spec.
-// See: http://wiki.commonjs.org/wiki/System/1.0
-class System : public QObject
+class File : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qint64 pid READ pid)
-    Q_PROPERTY(QStringList args READ args)
-    Q_PROPERTY(QVariant env READ env)
-    Q_PROPERTY(QVariant os READ os)
-    Q_PROPERTY(bool isSSLSupported READ isSSLSupported)
-    Q_PROPERTY(QObject *stdout READ _stdout)
-    Q_PROPERTY(QObject *stderr READ _stderr)
-    Q_PROPERTY(QObject *stdin READ _stdin)
 
 public:
-    explicit System(QObject *parent = 0);
-    virtual ~System();
+    // handle a textfile with given codec
+    // if @p codec is null, the file is considered to be binary
+    File(QFile *openfile, QTextCodec *codec, QObject *parent = 0);
+    virtual ~File();
 
-    qint64 pid() const;
+public slots:
+    /**
+     * @param n Number of bytes to read (a negative value means read up to EOF)
+     * NOTE: The use of QVariant here is necessary to catch JavaScript `null`.
+     * @see <a href="http://wiki.commonjs.org/wiki/IO/A#Instance_Methods">IO/A spec</a>
+     */
+    QString read(const QVariant &n = -1);
+    bool write(const QString &data);
 
-    void setArgs(const QStringList& args);
-    QStringList args() const;
+    bool seek(const qint64 pos);
 
-    QVariant env() const;
+    QString readLine();
+    bool writeLine(const QString &data);
 
-    QVariant os() const;
-
-    bool isSSLSupported() const;
-
-    // system.stdout
-    QObject *_stdout();
-
-    // system.stderr
-    QObject *_stderr();
-
-    // system.stdin
-    QObject *_stdin();
+    bool atEnd() const;
+    void flush();
+    void close();
 
 private:
-    QStringList m_args;
-    QVariant m_env;
-    QMap<QString, QVariant> m_os;
-    File *m_stdout;
-    File *m_stderr;
-    File *m_stdin;
+    QFile *m_file;
+    QTextStream *m_fileStream;
 };
 
-#endif // SYSTEM_H
+#endif // FILE_H

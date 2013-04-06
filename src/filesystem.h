@@ -31,44 +31,7 @@
 #define FILESYSTEM_H
 
 #include <QStringList>
-#include <QFile>
-#include <QTextCodec>
-#include <QTextStream>
 #include <QVariant>
-
-class File : public QObject
-{
-    Q_OBJECT
-
-public:
-    // handle a textfile with given codec
-    // if @p codec is null, the file is considered to be binary
-    File(QFile *openfile, QTextCodec *codec, QObject *parent = 0);
-    virtual ~File();
-
-public slots:
-    /**
-     * @param n Number of bytes to read (a negative value means read up to EOF)
-     * NOTE: The use of QVariant here is necessary to catch JavaScript `null`.
-     * @see <a href="http://wiki.commonjs.org/wiki/IO/A#Instance_Methods">IO/A spec</a>
-     */
-    QString read(const QVariant &n = -1);
-    bool write(const QString &data);
-
-    bool seek(const qint64 pos);
-
-    QString readLine();
-    bool writeLine(const QString &data);
-
-    bool atEnd() const;
-    void flush();
-    void close();
-
-private:
-    QFile *m_file;
-    QTextStream *m_fileStream;
-};
-
 
 class FileSystem : public QObject
 {
