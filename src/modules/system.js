@@ -32,8 +32,10 @@
  * Spec: http://wiki.commonjs.org/wiki/System/1.0
  */
 
+var fs = require('fs');
+
 exports.platform = 'phantomjs';
 
-exports.stdin = exports._stdin;
-exports.stdout = exports._stdout;
-exports.stderr = exports._stderr;
+exports.stdin = fs._addAsyncFuncsToFile(exports._stdin);
+exports.stdout = fs._addAsyncFuncsToFile(exports._stdout);
+exports.stderr = fs._addAsyncFuncsToFile(exports._stderr);
