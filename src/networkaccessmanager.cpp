@@ -217,7 +217,7 @@ QNetworkReply *NetworkAccessManager::createRequest(Operation op, const QNetworkR
     // set custom HTTP headers
     QVariantMap::const_iterator i = m_customHeaders.begin();
     while (i != m_customHeaders.end()) {
-        req.setRawHeader(i.key().toAscii(), i.value().toByteArray());
+        req.setRawHeader(i.key().toLatin1(), i.value().toByteArray());
         ++i;
     }
 

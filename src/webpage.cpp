@@ -794,7 +794,7 @@ void WebPage::openUrl(const QString &address, const QVariant &op, const QVariant
         operation = settingsMap.value("operation").toString();
         QString bodyString = settingsMap.value("data").toString();
         QString encoding = settingsMap.value("encoding").toString().toLower();
-        body = encoding == "utf-8" || encoding == "utf8" ? bodyString.toUtf8() : bodyString.toAscii();
+        body = encoding == "utf-8" || encoding == "utf8" ? bodyString.toUtf8() : bodyString.toLatin1();
         if (settingsMap.contains("headers")) {
             QMapIterator<QString, QVariant> i(settingsMap.value("headers").toMap());
             while (i.hasNext()) {
@@ -821,14 +821,14 @@ void WebPage::openUrl(const QString &address, const QVariant &op, const QVariant
         networkOp = QNetworkAccessManager::DeleteOperation;
 
     if (networkOp == QNetworkAccessManager::UnknownOperation) {
-        m_mainFrame->evaluateJavaScript("console.error('Unknown network operation: " + operation + "');", QString());
+        m_mainFrame->evaluateJavaScript("console.error('Unknown network operation: " + operation + "');");//, QString());
         return;
     }
 
     if (address == "about:blank") {
         m_mainFrame->setHtml(BLANK_HTML);
     } else {
-        QUrl url = QUrl::fromEncoded(QByteArray(address.toAscii()));
+        QUrl url = QUrl::fromEncoded(QByteArray(address.toLatin1()));
 
 #if QT_VERSION == QT_VERSION_CHECK(4, 8, 0)
         // Assume local file if scheme is empty
@@ -923,7 +923,7 @@ bool WebPage::render(const QString &fileName, const QVariantMap &option)
             _setmode(_fileno(stdout), O_BINARY);
 #endif
 
-            ((File *)system->_stdout())->write(QString::fromAscii(ba.constData(), ba.size()));
+            ((File *)system->_stdout())->write(QString::fromLatin1(ba.constData(), ba.size()));
 
 #ifdef Q_OS_WIN32
             _setmode(_fileno(stdout), O_TEXT);
@@ -934,7 +934,7 @@ bool WebPage::render(const QString &fileName, const QVariantMap &option)
             _setmode(_fileno(stderr), O_BINARY);
 #endif
 
-            ((File *)system->_stderr())->write(QString::fromAscii(ba.constData(), ba.size()));
+            ((File *)system->_stderr())->write(QString::fromLatin1(ba.constData(), ba.size()));
 
 #ifdef Q_OS_WIN32
             _setmode(_fileno(stderr), O_TEXT);
