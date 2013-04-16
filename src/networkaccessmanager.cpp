@@ -131,7 +131,7 @@ NetworkAccessManager::NetworkAccessManager(QObject *parent, const Config *config
         if (config->sslProtocol() == "sslv2") {
             m_sslConfiguration.setProtocol(QSsl::SslV2);
         } else if (config->sslProtocol() == "tlsv1") {
-            m_sslConfiguration.setProtocol(QSsl::TlsV1);
+            m_sslConfiguration.setProtocol(QSsl::TlsV1_0);
         } else if (config->sslProtocol() == "any") {
             m_sslConfiguration.setProtocol(QSsl::AnyProtocol);
         }
