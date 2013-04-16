@@ -1,6 +1,9 @@
 TEMPLATE = app
 TARGET = phantomjs
 QT += network webkit
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += printsupport webkitwidgets
+}
 CONFIG += console
 
 DESTDIR = ../bin
