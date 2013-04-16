@@ -101,7 +101,7 @@ int main(int argc, char** argv, const char** envp)
     Env::instance()->parse(envp);
 
     // Registering an alternative Message Handler
-    qInstallMsgHandler(Utils::messageHandler);
+    qInstallMessageHandler(Utils::messageHandler);
 
 #if defined(Q_OS_LINUX)
     if (QSslSocket::supportsSsl()) {
