@@ -29,7 +29,7 @@
 
 #include "repl.h"
 
-#include <QDesktopServices>
+#include <QStandardPaths>
 #include <QTimer>
 #include <QDir>
 #include <QRegExp>
@@ -134,11 +134,11 @@ REPL::REPL(QWebFrame *webframe, Phantom *parent)
     m_webframe = webframe;
     m_parentPhantom = parent;
     m_historyFilepath = QString("%1/%2").arg(
-                QDesktopServices::storageLocation(QDesktopServices::DataLocation),
+                QStandardPaths::writableLocation(QStandardPaths::DataLocation),
                 HISTORY_FILENAME).toLocal8Bit();
 
     // Ensure the location for the history file exists
-    QDir().mkpath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
 
     // Listen for Phantom exit(ing)
     connect(m_parentPhantom, SIGNAL(aboutToExit(int)), this, SLOT(stopLoop(int)));
