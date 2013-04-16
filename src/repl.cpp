@@ -96,7 +96,7 @@ QStringList REPL::_enumerateCompletions(QObject *obj) const
     const int methodOffset = meta->methodOffset();
     const int methodCount = meta->methodCount();
     for (int i = methodOffset; i < methodCount; i++) {
-        const QString name = QString::fromLatin1(meta->method(i).signature());
+        const QString name(meta->method(i).methodSignature());
         // Ignore methods starting with underscores
         if (name.startsWith('_')) {
             continue;
