@@ -30,11 +30,11 @@
 
 #include "phantom.h"
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
-#include <QWebPage>
+#include <QtWebKitWidgets/QWebPage>
 #include <QDebug>
 #include <QMetaObject>
 #include <QMetaProperty>

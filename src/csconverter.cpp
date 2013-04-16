@@ -30,7 +30,7 @@
 #include "csconverter.h"
 
 #include <QCoreApplication>
-#include <QWebFrame>
+#include <QtWebKitWidgets/QWebFrame>
 
 #include "utils.h"
 #include "terminal.h"

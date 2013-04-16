@@ -33,8 +33,8 @@
 
 #include <QMap>
 #include <QVariantMap>
-#include <QWebPage>
-#include <QWebFrame>
+#include <QtWebKitWidgets/QWebPage>
+#include <QtWebKitWidgets/QWebFrame>
 
 class Config;
 class CustomPage;

@@ -32,7 +32,7 @@
 #define UTILS_H
 
 #include <QtGlobal>
-#include <QWebFrame>
+#include <QtWebKitWidgets/QWebFrame>
 #include <QFile>
 
 #include "csconverter.h"

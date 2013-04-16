@@ -32,7 +32,7 @@
 
 #include <math.h>
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QDesktopServices>
 #include <QDateTime>
 #include <QDir>
@@ -47,9 +47,9 @@
 #include <QWebHistory>
 #include <QWebHistoryItem>
 #include <QWebElement>
-#include <QWebFrame>
-#include <QWebPage>
-#include <QWebInspector>
+#include <QtWebKitWidgets/QWebFrame>
+#include <QtWebKitWidgets/QWebPage>
+#include <QtWebKitWidgets/QWebInspector>
 #include <QMapIterator>
 #include <QBuffer>
 #include <QDebug>
