@@ -679,8 +679,8 @@ QVariant WebPage::evaluateJavaScript(const QString &code)
     qDebug() << "WebPage - evaluateJavaScript" << function;
 
     evalResult = m_currentFrame->evaluateJavaScript(
-                function,                                   //< function evaluated
-                QString("phantomjs://webpage.evaluate()")); //< reference source file
+                function//,                                   //< function evaluated
+                /*QString("phantomjs://webpage.evaluate()")*/); //< reference source file
 
     qDebug() << "WebPage - evaluateJavaScript result" << evalResult;
 
@@ -1219,7 +1219,7 @@ QString getHeaderFooter(const QVariantMap &map, const QString &key, QWebFrame *f
             }
         }
     }
-    frame->evaluateJavaScript("console.error('Bad header callback given, use phantom.callback);", QString());
+    frame->evaluateJavaScript("console.error('Bad header callback given, use phantom.callback);");//, QString());
     return QString();
 }
 
@@ -1255,7 +1255,7 @@ bool WebPage::injectJs(const QString &jsFilePath) {
 }
 
 void WebPage::_appendScriptElement(const QString &scriptUrl) {
-    m_currentFrame->evaluateJavaScript(QString(JS_APPEND_SCRIPT_ELEMENT).arg(scriptUrl), scriptUrl);
+    m_currentFrame->evaluateJavaScript(QString(JS_APPEND_SCRIPT_ELEMENT).arg(scriptUrl));//, scriptUrl);
 }
 
 QObject *WebPage::_getGenericCallback() {
