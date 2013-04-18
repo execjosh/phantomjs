@@ -1561,7 +1561,7 @@ static void injectCallbacksObjIntoFrame(QWebFrame *frame, WebpageCallbacks *call
     // Inject object only if it's not already present
     if (frame->evaluateJavaScript(CALLBACKS_OBJECT_PRESENT).toBool() == false) {
         // Decorate the window object in this frame (object ownership left to the creator/parent)
-        frame->addToJavaScriptWindowObject(CALLBACKS_OBJECT_NAME, callbacksObject, QScriptEngine::QtOwnership);
+        frame->addToJavaScriptWindowObject(CALLBACKS_OBJECT_NAME, callbacksObject, QWebFrame::QtOwnership);
         frame->evaluateJavaScript(CALLBACKS_OBJECT_INJECTION);
     }
 }
