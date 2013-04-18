@@ -13,6 +13,9 @@ RESOURCES = phantomjs.qrc \
 
 HEADERS += csconverter.h \
     phantom.h \
+    js/pjsengine.h \
+    js/console.h \
+    js/timercontext.h \
     callback.h \
     webpage.h \
     webserver.h \
@@ -30,6 +33,9 @@ HEADERS += csconverter.h \
     repl.h
 
 SOURCES += phantom.cpp \
+    js/pjsengine.cpp \
+    js/console.cpp \
+    js/timercontext.cpp \
     callback.cpp \
     webpage.cpp \
     webserver.cpp \

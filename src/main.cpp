@@ -28,6 +28,56 @@
 */
 
 #include "consts.h"
+
+#include <QApplication>
+#include <QIcon>
+
+#include "js/pjsengine.h"
+
+int main(int argc, char** argv, const char** envp)
+{
+    Q_UNUSED(envp)
+
+    QApplication app(argc, argv);
+
+    app.setWindowIcon(QIcon(":/phantomjs-icon.png"));
+    app.setApplicationName("PhantomJS");
+    app.setOrganizationName("Ofi Labs");
+    app.setOrganizationDomain("www.ofilabs.com");
+    app.setApplicationVersion(PHANTOMJS_VERSION_STRING);
+
+    JS::PJSEngine pjse(&app);
+
+    if (!pjse.init()) {
+        return -1;
+    }
+
+    pjse.evaluate(
+        "var timeoutId = setTimeout(function () {"
+            "console.log('Hello, ' + timeoutId + '!');"
+            "phantom.exit(0);"
+        "}, 3000);"
+        "var omfg = 5;"
+        "var intervalId = setInterval(function () {"
+            "if (--omfg) {"
+                "console.log('' + intervalId + ' ' + omfg);"
+            "} else {"
+                "clearInterval(intervalId);"
+                "console.log('' + intervalId + ' ' + omfg + ' -- clearInterval');"
+            "}"
+        "}, 300);"
+    );
+
+    if (pjse.isTerminated()) {
+        // TODO: return value...
+        return 0;
+    }
+
+    // TODO: return value...
+    return app.exec();
+}
+
+/*
 #include "utils.h"
 #include "env.h"
 #include "phantom.h"
@@ -123,3 +173,4 @@ int main(int argc, char** argv, const char** envp)
     delete phantom;
     return retVal;
 }
+*/
