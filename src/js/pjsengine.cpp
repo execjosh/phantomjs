@@ -67,7 +67,21 @@ bool PJSEngine::init()
 
     if ((JS::Console *) NULL == m_console) {
         m_console = new JS::Console(this);
-        QJSValue console = m_js->newQObject(m_console);
+        QJSValue _console = m_js->newQObject(m_console);
+        m_js->globalObject().setProperty("_console", _console);
+        QJSValue console = m_js->evaluate(
+            "(function () {"
+                "var __slice = [].slice;"
+                "function log() {"
+                    "var args = 0 === arguments.length ? [] : __slice.apply(arguments);"
+                    // TODO: `printf` type arguments?
+                    "return _console.log(args.join(' '));"
+                "}"
+                "return {"
+                    "log: log"
+                "};"
+            "}())"
+        );
         m_js->globalObject().setProperty("console", console);
     }
 

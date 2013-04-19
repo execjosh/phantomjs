@@ -54,16 +54,16 @@ int main(int argc, char** argv, const char** envp)
 
     pjse.evaluate(
         "var timeoutId = setTimeout(function () {"
-            "console.log('Hello, ' + timeoutId + '!');"
+            "console.log('Hello,', timeoutId, '!');"
             "phantom.exit(0);"
         "}, 3000);"
         "var omfg = 5;"
         "var intervalId = setInterval(function () {"
             "if (--omfg) {"
-                "console.log('' + intervalId + ' ' + omfg);"
+                "console.log(intervalId, omfg);"
             "} else {"
                 "clearInterval(intervalId);"
-                "console.log('' + intervalId + ' ' + omfg + ' -- clearInterval');"
+                "console.log(intervalId, omfg, '-- clearInterval');"
             "}"
         "}, 300);"
     );
