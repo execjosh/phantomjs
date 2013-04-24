@@ -27,51 +27,54 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef JS_PJSENGINE_H
-#define JS_PJSENGINE_H
-
-#include <QObject>
-#include <QJSEngine>
-#include <QJSValue>
-
-#include "console.h"
-#include "timers.h"
 #include "nativemodules.h"
 
 namespace JS
 {
 
-class PJSEngine : public QObject
+// public:
+
+NativeModules::NativeModules(QObject *parent)
+    : QObject(parent)
+    , m_childprocess((ChildProcess *) NULL)
+    , m_filesystem((FileSystem *) NULL)
+    , m_system((System *) NULL)
 {
-    Q_OBJECT
+}
 
-public:
-    explicit PJSEngine(QObject *parent = 0);
-    virtual ~PJSEngine();
+NativeModules::~NativeModules()
+{
+}
 
-    bool init();
-    void evaluate(const QString &src, const QString &file = "");
+// public slots:
 
-signals:
+QObject *NativeModules::getChildProcess()
+{
+    if ((ChildProcess *) NULL == m_childprocess) {
+        m_childprocess = new ChildProcess(this);
+    }
 
-public slots:
-    void exit(int code = 0);
-    bool isTerminated() const;
+    return m_childprocess;
+}
 
-    // Module stuff
-    QJSValue loadModule(const QString &moduleSource, const QString &filename);
+QObject *NativeModules::getFileSystem()
+{
+    if ((FileSystem *) NULL == m_filesystem) {
+        m_filesystem = new FileSystem(this);
+    }
 
-private:
-    bool m_initialized;
-    bool m_terminated;
-    QJSEngine *m_js;
-    JS::Console *m_console;
-    Timers *m_timers;
-    NativeModules *m_nativemodules;
+    return m_filesystem;
+}
+
+QObject *NativeModules::getSystem()
+{
+    if ((System *) NULL == m_system) {
+        m_system = new System(this);
+    }
+
+    return m_system;
+}
+
 };
-
-};
-
-#endif // JS_PJSENGINE_H
 
 // vim:ts=4:sw=4:sts=4:et:

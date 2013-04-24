@@ -45,6 +45,7 @@ PJSEngine::PJSEngine(QObject *parent)
     , m_js((QJSEngine *) NULL)
     , m_console((JS::Console *) NULL)
     , m_timers((JS::Timers *) NULL)
+    , m_nativemodules((JS::NativeModules *) NULL)
 {
 }
 
@@ -88,6 +89,11 @@ bool PJSEngine::init()
     }
     QJSValue timers = m_js->newQObject(m_timers);
 
+    if ((JS::NativeModules *) NULL == m_nativemodules) {
+        m_nativemodules = new JS::NativeModules(this);
+    }
+    QJSValue nativeModules = m_js->newQObject(m_nativemodules);
+
     QJSValue me = m_js->newQObject(this);
 
     QJSValue createTimerFunc = m_js->evaluate(
@@ -106,6 +112,10 @@ bool PJSEngine::init()
 
     QJSValue phantom = m_js->newObject();
     phantom.setProperty("exit", me.property("exit"));
+    phantom.setProperty("loadModule", me.property("loadModule"));
+    phantom.setProperty("_createChildProcess", nativeModules.property("getChildProcess"));
+    phantom.setProperty("createFilesystem", nativeModules.property("getFileSystem"));
+    phantom.setProperty("createSystem", nativeModules.property("getSystem"));
     m_js->globalObject().setProperty("phantom", phantom);
 
     m_initialized = true;
@@ -139,6 +149,26 @@ bool PJSEngine::isTerminated() const
     return m_terminated;
 }
 
+QJSValue PJSEngine::loadModule(const QString &moduleSource, const QString &filename)
+{
+    if (isTerminated()) {
+        return QJSValue(QJSValue::UndefinedValue);
+    }
+
+   QString scriptSource =
+      "(function(require, exports, module) {" +
+      moduleSource +
+      "}.call({},"
+      "require.cache['" + filename + "']._getRequire(),"
+      "require.cache['" + filename + "'].exports,"
+      "require.cache['" + filename + "']"
+      "));";
+   QJSValue res = m_js->evaluate(scriptSource, filename);
+   if (res.isError()) {
+       std::cerr << "uncaught exception: " << qPrintable(res.property("stack").toString()) << std::endl;
+   }
+   return res;
+}
 
 };
 

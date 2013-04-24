@@ -17,6 +17,7 @@ HEADERS += csconverter.h \
     js/console.h \
     js/timers.h \
     js/timercontext.h \
+    js/nativemodules.h \
     callback.h \
     webpage.h \
     webserver.h \
@@ -38,6 +39,7 @@ SOURCES += phantom.cpp \
     js/console.cpp \
     js/timers.cpp \
     js/timercontext.cpp \
+    js/nativemodules.cpp \
     callback.cpp \
     webpage.cpp \
     webserver.cpp \

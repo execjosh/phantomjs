@@ -27,51 +27,39 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef JS_PJSENGINE_H
-#define JS_PJSENGINE_H
+#ifndef JS_NATIVEMODULES_H
+#define JS_NATIVEMODULES_H
 
 #include <QObject>
-#include <QJSEngine>
-#include <QJSValue>
 
-#include "console.h"
-#include "timers.h"
-#include "nativemodules.h"
+#include "../filesystem.h"
+#include "../system.h"
+#include "../childprocess.h"
 
 namespace JS
 {
 
-class PJSEngine : public QObject
+class NativeModules : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit PJSEngine(QObject *parent = 0);
-    virtual ~PJSEngine();
-
-    bool init();
-    void evaluate(const QString &src, const QString &file = "");
-
-signals:
+    explicit NativeModules(QObject *parent = 0);
+    virtual ~NativeModules();
 
 public slots:
-    void exit(int code = 0);
-    bool isTerminated() const;
-
-    // Module stuff
-    QJSValue loadModule(const QString &moduleSource, const QString &filename);
+    QObject *getChildProcess();
+    QObject *getFileSystem();
+    QObject *getSystem();
 
 private:
-    bool m_initialized;
-    bool m_terminated;
-    QJSEngine *m_js;
-    JS::Console *m_console;
-    Timers *m_timers;
-    NativeModules *m_nativemodules;
+    ChildProcess *m_childprocess;
+    FileSystem *m_filesystem;
+    System *m_system;
 };
 
 };
 
-#endif // JS_PJSENGINE_H
+#endif // JS_NATIVEMODULES_H
 
 // vim:ts=4:sw=4:sts=4:et:
