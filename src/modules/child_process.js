@@ -4,7 +4,7 @@
 /*
   This file is part of the PhantomJS project from Ofi Labs.
 
-  Copyright (C) 2012 execjosh, http://execjosh.blogspot.com
+  Copyright (C) 2012-13 execjosh, http://execjosh.blogspot.com
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -30,12 +30,20 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+function defineProperty(o, name, value) {
+    Object.defineProperty(o, name, {value: value});
+}
+
+function exportProperty(name, value) {
+    defineProperty(exports, name, value);
+}
+
 var NOP = function () {}
 
 /**
  * spawn(command, [args], [options])
  */
-exports.spawn = function (cmd, args, opts) {
+exportProperty("spawn", function spawn(cmd, args, opts) {
   var ctx = newContext()
 
   if (null == opts) {
@@ -48,23 +56,23 @@ exports.spawn = function (cmd, args, opts) {
   ctx._start(cmd, args)
 
   return ctx
-}
+})
 
 /**
  * exec(command, [options], callback)
  */
-exports.exec = function (cmd, opts, cb) {
+exportProperty("exec", function exec(cmd, opts, cb) {
   if (null == cb) {
     cb = NOP
   }
 
   return cb(new Error("NotYetImplemented"))
-}
+})
 
 /**
  * execFile(file, args, options, callback)
  */
-exports.execFile = function (cmd, args, opts, cb) {
+exportProperty("execFile", function execFile(cmd, args, opts, cb) {
   var ctx = newContext()
 
   if (null == cb) {
@@ -95,14 +103,14 @@ exports.execFile = function (cmd, args, opts, cb) {
   ctx._start(cmd, args)
 
   return ctx
-}
+})
 
 /**
  * fork(modulePath, [args], [options])
  */
-exports.fork = function (modulePath, args, opts) {
+exportProperty("fork", function fork(modulePath, args, opts) {
   throw new Error("NotYetImplemented")
-}
+})
 
 
 // private
@@ -112,7 +120,7 @@ function newContext() {
 
   // TODO: "Buffer" the signals and redispatch them?
 
-  ctx.on = function (evt, cb) {
+  defineProperty(ctx, "on", function (evt, cb) {
     var handler
 
     switch (evt) {
@@ -127,10 +135,10 @@ function newContext() {
     if (isFunction(handler)) {
       handler.connect(cb)
     }
-  }
+  })
 
-  ctx.stdout = new FakeReadableStream("stdout")
-  ctx.stderr = new FakeReadableStream("stderr")
+  defineProperty(ctx, "stdout", new FakeReadableStream("stdout"))
+  defineProperty(ctx, "stderr", new FakeReadableStream("stderr"))
 
   // Emulates `Readable Stream`
   function FakeReadableStream(streamName) {

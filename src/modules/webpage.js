@@ -7,7 +7,7 @@
   Copyright (C) 2011 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2011 Ivan De Marino <ivan.de.marino@gmail.com>
   Copyright (C) 2011 James Roe <roejames12@hotmail.com>
-  Copyright (C) 2011 execjosh, http://execjosh.blogspot.com
+  Copyright (C) 2011-13 execjosh, http://execjosh.blogspot.com
   Copyright (C) 2012 James M. Greene <james.m.greene@gmail.com>
 
   Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,14 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+function defineProperty(o, name, value) {
+    Object.defineProperty(o, name, {value: value});
+}
+
+function exportProperty(name, value) {
+    defineProperty(exports, name, value);
+}
 
 function checkType(o, type) {
     return typeof o === type;

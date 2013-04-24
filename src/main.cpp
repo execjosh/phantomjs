@@ -31,14 +31,28 @@
 
 #include <QApplication>
 #include <QIcon>
+#include <QString>
 
+#include "config.h"
 #include "js/pjsengine.h"
+#include "utils.h"
+
+#include <iostream>
 
 int main(int argc, char** argv, const char** envp)
 {
     Q_UNUSED(envp)
 
     QApplication app(argc, argv);
+
+    QStringList args = QApplication::arguments();
+    Config conf;
+    conf.init(&args);
+
+    if (conf.scriptFile().isEmpty()) {
+        std::cerr << "USAGE: phantomjs <script>" << std::endl;
+        return -1;
+    }
 
     app.setWindowIcon(QIcon(":/phantomjs-icon.png"));
     app.setApplicationName("PhantomJS");
@@ -52,21 +66,10 @@ int main(int argc, char** argv, const char** envp)
         return -1;
     }
 
-    pjse.evaluate(
-        "var timeoutId = setTimeout(function () {"
-            "console.log('Hello,', timeoutId, '!');"
-            "phantom.exit(0);"
-        "}, 3000);"
-        "var omfg = 5;"
-        "var intervalId = setInterval(function () {"
-            "if (--omfg) {"
-                "console.log(intervalId, omfg);"
-            "} else {"
-                "clearInterval(intervalId);"
-                "console.log(intervalId, omfg, '-- clearInterval');"
-            "}"
-        "}, 300);"
-    );
+    pjse.evaluate(Utils::readResourceFileUtf8(":/bootstrap.js"), ":/bootstrap.js");
+
+    QString source = Utils::readResourceFileUtf8(conf.scriptFile());
+    pjse.evaluate(source, conf.scriptFile());
 
     if (pjse.isTerminated()) {
         // TODO: return value...

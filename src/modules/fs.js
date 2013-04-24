@@ -5,6 +5,7 @@
   This file is part of the PhantomJS project from Ofi Labs.
 
   Copyright (C) 2011 Ivan De Marino <ivan.de.marino@gmail.com>
+  Copyright (C) 2012-13 execjosh, http://execjosh.blogspot.com
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -29,6 +30,14 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+function defineProperty(o, name, value) {
+    Object.defineProperty(o, name, {value: value});
+}
+
+function exportProperty(name, value) {
+    defineProperty(exports, name, value);
+}
 
 // JavaScript "shim" to throw exceptions in case a critical operation fails.
 
@@ -69,14 +78,14 @@ function modeOrOptsToOpts(modeOrOpts) {
  *          - charset An IANA, case insensitive, charset name.
  * @return "file" object
  */
-exports.open = function (path, modeOrOpts) {
+exportProperty("open", function open(path, modeOrOpts) {
     // Open file
     var file = exports._open(path, modeOrOptsToOpts(modeOrOpts));
     if (file) {
         return file;
     }
     throw "Unable to open file '" + path + "'";
-};
+});
 
 /** Open, read and return text content of a file.
  * It will throw an exception if it fails.
@@ -89,7 +98,7 @@ exports.open = function (path, modeOrOpts) {
  *          - charset An IANA, case insensitive, charset name.
  * @return file content
  */
-exports.read = function (path, modeOrOpts) {
+exportProperty("read", function read(path, modeOrOpts) {
     if (typeof modeOrOpts == 'string') {
         if (modeOrOpts.toLowerCase() == 'b') {
             // open binary
@@ -111,7 +120,7 @@ exports.read = function (path, modeOrOpts) {
 
     f.close();
     return content;
-};
+});
 
 /** Open and write text content to a file
  * It will throw an exception if it fails.
@@ -124,7 +133,7 @@ exports.read = function (path, modeOrOpts) {
  *          - mode (see Open Mode above)
  *          - charset An IANA, case insensitive, charset name.
  */
-exports.write = function (path, content, modeOrOpts) {
+exportProperty("write", function write(path, content, modeOrOpts) {
     var opts = modeOrOptsToOpts(modeOrOpts);
     // ensure we open for writing
     if ( typeof opts.mode !== 'string' ) {
@@ -136,7 +145,7 @@ exports.write = function (path, content, modeOrOpts) {
 
     f.write(content);
     f.close();
-};
+});
 
 /** Return the size of a file, in bytes.
  * It will throw an exception if it fails.
@@ -144,13 +153,13 @@ exports.write = function (path, content, modeOrOpts) {
  * @param path Path of the file to read the size of
  * @return File size in bytes
  */
-exports.size = function (path) {
+exportProperty("size", function size(path) {
     var size = exports._size(path);
     if (size !== -1) {
         return size;
     }
     throw "Unable to read file '" + path + "' size";
-};
+});
 
 /** Copy a file.
  * It will throw an exception if it fails.
@@ -158,11 +167,11 @@ exports.size = function (path) {
  * @param source Path of the source file
  * @param destination Path of the destination file
  */
-exports.copy = function (source, destination) {
+exportProperty("copy", function copy(source, destination) {
     if (!exports._copy(source, destination)) {
         throw "Unable to copy file '" + source + "' at '" + destination + "'";
     }
-};
+});
 
 /** Copy a directory tree.
  * It will throw an exception if it fails.
@@ -170,11 +179,11 @@ exports.copy = function (source, destination) {
  * @param source Path of the source directory tree
  * @param destination Path of the destination directory tree
  */
-exports.copyTree = function (source, destination) {
+exportProperty("copyTree", function copyTree(source, destination) {
     if (!exports._copyTree(source, destination)) {
         throw "Unable to copy directory tree '" + source + "' at '" + destination + "'";
     }
-};
+});
 
 /** Move a file.
  * It will throw an exception if it fails.
@@ -182,51 +191,51 @@ exports.copyTree = function (source, destination) {
  * @param source Path of the source file
  * @param destination Path of the destination file
  */
-exports.move = function (source, destination) {
+exportProperty("move", function move(source, destination) {
     exports.copy(source, destination);
     exports.remove(source);
-};
+});
 
 /** Removes a file.
  * It will throw an exception if it fails.
  *
  * @param path Path of the file to remove
  */
-exports.remove = function (path) {
+exportProperty("remove", function remove(path) {
     if (!exports._remove(path)) {
         throw "Unable to remove file '" + path + "'";
     }
-};
+});
 
 /** Removes a directory.
  * It will throw an exception if it fails.
  *
  * @param path Path of the directory to remove
  */
-exports.removeDirectory = function (path) {
+exportProperty("removeDirectory", function removeDirectory(path) {
     if (!exports._removeDirectory(path)) {
         throw "Unable to remove directory '" + path + "'";
     }
-};
+});
 
 /** Removes a directory tree.
  * It will throw an exception if it fails.
  *
  * @param path Path of the directory tree to remove
  */
-exports.removeTree = function (path) {
+exportProperty("removeTree", function removeTree(path) {
     if (!exports._removeTree(path)) {
         throw "Unable to remove directory tree '" + path + "'";
     }
-};
+});
 
-exports.touch = function (path) {
+exportProperty("touch", function touch(path) {
     exports.write(path, "", 'a');
-};
+});
 
 // Path stuff
 
-exports.join = function() {
+exportProperty("join", function join() {
     var args = [];
 
     if (0 < arguments.length) {
@@ -251,9 +260,9 @@ exports.join = function() {
     var ret = args.join("/");
 
     return 0 < ret.length ? ret : ".";
-};
+});
 
-exports.split = function (path) {
+exportProperty("split", function split(path) {
     if (typeof path !== "string") {
         return [];
     }
@@ -265,4 +274,4 @@ exports.split = function (path) {
         .replace(/\/$/, "")
         // And split
         .split("/")
-};
+});

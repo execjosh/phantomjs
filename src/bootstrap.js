@@ -76,10 +76,12 @@ phantom.__defineErrorSignalHandler__ = function(obj, page, handlers) {
     });
 };
 
+/*
 (function() {
     var handlers = {};
     phantom.__defineErrorSignalHandler__(phantom, phantom.page, handlers);
 })();
+*/
 
 // TODO: Make this output to STDERR
 phantom.defaultErrorHandler = function(message, stack) {
@@ -103,6 +105,8 @@ phantom.callback = function(callback) {
     });
     return ret;
 };
+
+window = this;
 
 (function() {
     // CommonJS module implementation follows
@@ -153,7 +157,7 @@ phantom.callback = function(callback) {
     }
 
     function basename(path) {
-        return path.replace(/.*\//, '');
+        return "string" === path ? path.replace(/.*\//, '') : "";
     }
 
     function joinPath() {
