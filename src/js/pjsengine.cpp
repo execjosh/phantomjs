@@ -29,7 +29,6 @@
 
 #include "pjsengine.h"
 
-#include <Qt>
 #include <QApplication>
 #include <QDebug>
 #include <iostream>
@@ -45,13 +44,12 @@ PJSEngine::PJSEngine(QObject *parent)
     , m_terminated(false)
     , m_js((QJSEngine *) NULL)
     , m_console((JS::Console *) NULL)
-    , m_timers()
+    , m_timers((JS::Timers *) NULL)
 {
 }
 
 PJSEngine::~PJSEngine()
 {
-    qDeleteAll(m_timers);
 }
 
 bool PJSEngine::init()
@@ -85,29 +83,26 @@ bool PJSEngine::init()
         m_js->globalObject().setProperty("console", console);
     }
 
+    if ((JS::Timers *) NULL == m_timers) {
+        m_timers = new JS::Timers(this);
+    }
+    QJSValue timers = m_js->newQObject(m_timers);
+
     QJSValue me = m_js->newQObject(this);
 
-    m_js->globalObject().setProperty("_createSingleShotTimer", me.property("createSingleShotTimer"));
-    m_js->globalObject().setProperty("_createRepeatingTimer", me.property("createRepeatingTimer"));
-    QJSValue timerFuncs = m_js->evaluate(
-        "(function () {"
-            "function timerFunc(timerFactory) {"
-                "return function (cb, ms) {"
-                    "var t = timerFactory(ms);"
-                    "t.timeout.connect(cb);"
-                    "return t.timerId;"
-                "};"
-            "}"
-            "return {"
-                " setTimeout: timerFunc(_createSingleShotTimer)"
-                ",setInterval: timerFunc(_createRepeatingTimer)"
-            "};"
-        "}())"
-    );
-    m_js->globalObject().setProperty("setTimeout", timerFuncs.property("setTimeout"));
-    m_js->globalObject().setProperty("setInterval", timerFuncs.property("setInterval"));
-    m_js->globalObject().setProperty("clearTimeout", me.property("clearTimer"));
-    m_js->globalObject().setProperty("clearInterval", me.property("clearTimer"));
+    QJSValue createTimerFunc = m_js->evaluate(
+        "(function timerFunc(timerFactory) {\n"
+            "return function (cb, ms) {\n"
+                "var t = timerFactory(ms)\n"
+                "t.timeout.connect(cb)\n"
+                "return t.timerId\n"
+            "}\n"
+        "})"
+    , "createTimerFunc");
+    m_js->globalObject().setProperty("setTimeout", createTimerFunc.call(QJSValueList() << timers.property("createSingleShotTimer")));
+    m_js->globalObject().setProperty("setInterval", createTimerFunc.call(QJSValueList() << timers.property("createRepeatingTimer")));
+    m_js->globalObject().setProperty("clearTimeout", timers.property("clearTimer"));
+    m_js->globalObject().setProperty("clearInterval", timers.property("clearTimer"));
 
     QJSValue phantom = m_js->newObject();
     phantom.setProperty("exit", me.property("exit"));
@@ -144,48 +139,6 @@ bool PJSEngine::isTerminated() const
     return m_terminated;
 }
 
-QObject *PJSEngine::createSingleShotTimer(int ms)
-{
-    return _createTimer(ms, true);
-}
-
-QObject *PJSEngine::createRepeatingTimer(int ms)
-{
-    return _createTimer(ms, false);
-}
-
-void PJSEngine::clearTimer(int id)
-{
-    // TODO: how to prevent double kills?
-    QObject::killTimer(id);
-    m_timers.remove(id);
-}
-
-void PJSEngine::timerEvent(QTimerEvent *e)
-{
-    int id = e->timerId();
-    JS::TimerContext *tc = m_timers.value(id);
-    if (-1 == tc->timerId()) {
-        QObject::killTimer(id);
-    } else if (tc->isSingleShot()) {
-        clearTimer(id);
-        tc->invokeTimeout();
-        tc->deleteLater();
-    } else {
-        tc->invokeTimeout();
-    }
-}
-
-// private:
-
-QObject *PJSEngine::_createTimer(int ms, bool isSingleShot)
-{
-    // TODO: Use Qt::CoarseTimer for long timeouts?
-    Qt::TimerType timerType = Qt::PreciseTimer;
-    JS::TimerContext *tc = new JS::TimerContext(QObject::startTimer(ms, timerType), isSingleShot, this);
-    m_timers.insert(tc->timerId(), tc);
-    return tc;
-}
 
 };
 

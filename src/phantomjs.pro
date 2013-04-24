@@ -15,6 +15,7 @@ HEADERS += csconverter.h \
     phantom.h \
     js/pjsengine.h \
     js/console.h \
+    js/timers.h \
     js/timercontext.h \
     callback.h \
     webpage.h \
@@ -35,6 +36,7 @@ HEADERS += csconverter.h \
 SOURCES += phantom.cpp \
     js/pjsengine.cpp \
     js/console.cpp \
+    js/timers.cpp \
     js/timercontext.cpp \
     callback.cpp \
     webpage.cpp \

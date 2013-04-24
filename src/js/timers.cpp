@@ -27,47 +27,74 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef JS_PJSENGINE_H
-#define JS_PJSENGINE_H
-
-#include <QObject>
-#include <QJSEngine>
-#include <QVariant>
-
-#include "console.h"
 #include "timers.h"
+
+#include <Qt>
+#include <QTimerEvent>
 
 namespace JS
 {
 
-class PJSEngine : public QObject
+// public:
+
+Timers::Timers(QObject *parent)
+    : QObject(parent)
+    , m_timers()
 {
-    Q_OBJECT
+}
 
-public:
-    explicit PJSEngine(QObject *parent = 0);
-    virtual ~PJSEngine();
+Timers::~Timers()
+{
+    qDeleteAll(m_timers);
+}
 
-    bool init();
-    void evaluate(const QString &src, const QString &file = "");
+// public slots:
 
-signals:
+QObject *Timers::createSingleShotTimer(int ms)
+{
+    return _createTimer(ms, true);
+}
 
-public slots:
-    void exit(int code = 0);
-    bool isTerminated() const;
+QObject *Timers::createRepeatingTimer(int ms)
+{
+    return _createTimer(ms, false);
+}
 
+void Timers::clearTimer(int id)
+{
+    // TODO: how to prevent double kills?
+    QObject::killTimer(id);
+    m_timers.remove(id);
+}
 
-private:
-    bool m_initialized;
-    bool m_terminated;
-    QJSEngine *m_js;
-    JS::Console *m_console;
-    Timers *m_timers;
+// protected:
+
+void Timers::timerEvent(QTimerEvent *evt)
+{
+    int id = evt->timerId();
+    JS::TimerContext *tc = m_timers.value(id);
+    if (-1 == tc->timerId()) {
+        QObject::killTimer(id);
+    } else if (tc->isSingleShot()) {
+        clearTimer(id);
+        tc->invokeTimeout();
+        tc->deleteLater();
+    } else {
+        tc->invokeTimeout();
+    }
+}
+
+// private:
+
+QObject *Timers::_createTimer(int ms, bool isSingleShot)
+{
+    // TODO: Use Qt::CoarseTimer for long timeouts?
+    Qt::TimerType timerType = Qt::PreciseTimer;
+    JS::TimerContext *tc = new JS::TimerContext(QObject::startTimer(ms, timerType), isSingleShot, this);
+    m_timers.insert(tc->timerId(), tc);
+    return tc;
+}
+
 };
-
-};
-
-#endif // JS_PJSENGINE_H
 
 // vim:ts=4:sw=4:sts=4:et:

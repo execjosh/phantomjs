@@ -27,47 +27,41 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef JS_PJSENGINE_H
-#define JS_PJSENGINE_H
+#ifndef JS_TIMERS_H
+#define JS_TIMERS_H
 
 #include <QObject>
-#include <QJSEngine>
-#include <QVariant>
-
-#include "console.h"
-#include "timers.h"
+#include <QMap>
+#include "timercontext.h"
 
 namespace JS
 {
 
-class PJSEngine : public QObject
+class Timers : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit PJSEngine(QObject *parent = 0);
-    virtual ~PJSEngine();
-
-    bool init();
-    void evaluate(const QString &src, const QString &file = "");
-
-signals:
+    explicit Timers(QObject *parent = 0);
+    virtual ~Timers();
 
 public slots:
-    void exit(int code = 0);
-    bool isTerminated() const;
+    // Timeout stuff
+    QObject *createSingleShotTimer(int ms);
+    QObject *createRepeatingTimer(int ms);
+    void clearTimer(int id);
 
+protected:
+    void timerEvent(QTimerEvent *e);
 
 private:
-    bool m_initialized;
-    bool m_terminated;
-    QJSEngine *m_js;
-    JS::Console *m_console;
-    Timers *m_timers;
+    QObject *_createTimer(int ms, bool isSingleShot);
+
+    QMap<int, JS::TimerContext *> m_timers;
 };
 
 };
 
-#endif // JS_PJSENGINE_H
+#endif // JS_TIMERS_H
 
 // vim:ts=4:sw=4:sts=4:et:
