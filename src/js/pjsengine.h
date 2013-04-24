@@ -50,7 +50,7 @@ public:
     virtual ~PJSEngine();
 
     bool init();
-    void evaluate(const QString &src, const QString &file = "");
+    QJSValue evaluate(const QString &src, const QString &file = "");
 
 signals:
 

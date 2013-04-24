@@ -66,21 +66,22 @@ bool PJSEngine::init()
 
     if ((JS::Console *) NULL == m_console) {
         m_console = new JS::Console(this);
-        QJSValue _console = m_js->newQObject(m_console);
-        m_js->globalObject().setProperty("_console", _console);
-        QJSValue console = m_js->evaluate(
-            "(function () {"
-                "var __slice = [].slice;"
-                "function log() {"
-                    "var args = 0 === arguments.length ? [] : __slice.apply(arguments);"
+        QJSValue console = m_js->newQObject(m_console);
+        QJSValue augmentConsole = evaluate(
+            "(function augmentConsole(console) {\n"
+                "'use strict'\n"
+                "var __slice = [].slice\n"
+                "var oldLog = console.log\n"
+                "Object.defineProperty(console, 'log', {value: function log() {\n"
+                    "var args = 0 === arguments.length ? [] : __slice.apply(arguments)\n"
                     // TODO: `printf` type arguments?
-                    "return _console.log(args.join(' '));"
-                "}"
-                "return {"
-                    "log: log"
-                "};"
-            "}())"
+                    "return oldLog.call(console, args.join(' '))\n"
+                "}})\n"
+                "Object.freeze(console)\n"
+            "})"
+        , "augmentConsole"
         );
+        augmentConsole.call(QJSValueList() << console);
         m_js->globalObject().setProperty("console", console);
     }
 
@@ -96,7 +97,7 @@ bool PJSEngine::init()
 
     QJSValue me = m_js->newQObject(this);
 
-    QJSValue createTimerFunc = m_js->evaluate(
+    QJSValue createTimerFunc = evaluate(
         "(function timerFunc(timerFactory) {\n"
             "return function (cb, ms) {\n"
                 "var t = timerFactory(ms)\n"
@@ -123,16 +124,13 @@ bool PJSEngine::init()
     return true;
 }
 
-void PJSEngine::evaluate(const QString &src, const QString &file)
+QJSValue PJSEngine::evaluate(const QString &src, const QString &file)
 {
-    if (!m_initialized) {
-        return;
-    }
-
     QJSValue result = m_js->evaluate(src, file);
     if (result.isError()) {
-        qDebug() << "uncaught exception:" << result.toString();
+        std::cerr << "uncaught exception: " << qPrintable(result.property("stack").toString()) << std::endl;
     }
+    return result;
 }
 
 // public slots:
@@ -163,11 +161,7 @@ QJSValue PJSEngine::loadModule(const QString &moduleSource, const QString &filen
       "require.cache['" + filename + "'].exports,"
       "require.cache['" + filename + "']"
       "));";
-   QJSValue res = m_js->evaluate(scriptSource, filename);
-   if (res.isError()) {
-       std::cerr << "uncaught exception: " << qPrintable(res.property("stack").toString()) << std::endl;
-   }
-   return res;
+   return evaluate(scriptSource, filename);
 }
 
 };
