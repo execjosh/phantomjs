@@ -244,7 +244,7 @@ function decorateNewPage(opts, page) {
     } catch (e) {}
 
     // deep copy
-    page.settings = JSON.parse(JSON.stringify(phantom.defaultPageSettings));
+    defineProperty(page, "settings", JSON.parse(JSON.stringify(phantom.defaultPageSettings)));
 
     definePageSignalHandler(page, handlers, "onInitialized", "initialized");
 
@@ -277,7 +277,7 @@ function decorateNewPage(opts, page) {
 
     page.onError = phantom.defaultErrorHandler;
 
-    page.open = function (url, arg1, arg2, arg3, arg4) {
+    defineProperty(page, "open", function open(url, arg1, arg2, arg3, arg4) {
         var thisPage = this;
 
         if (arguments.length === 1) {
@@ -329,14 +329,14 @@ function decorateNewPage(opts, page) {
             return;
         }
         throw "Wrong use of WebPage#open";
-    };
+    });
 
     /**
      * Include an external JavaScript file and notify when done.
      * @param scriptUrl URL to the Script to include
      * @param onScriptLoaded If provided, this call back is executed when the inclusion is done
      */
-    page.includeJs = function (scriptUrl, onScriptLoaded) {
+    defineProperty(page, "includeJs", function includeJs(scriptUrl, onScriptLoaded) {
         // Register temporary signal handler for 'alert()'
         this.javaScriptAlertSent.connect(function (msgFromAlert) {
             if (msgFromAlert === scriptUrl) {
@@ -353,7 +353,7 @@ function decorateNewPage(opts, page) {
 
         // Append the script tag to the body
         this._appendScriptElement(scriptUrl);
-    };
+    });
 
     /**
      * evaluate a function in the page
@@ -361,7 +361,7 @@ function decorateNewPage(opts, page) {
      * @param   {...}       args    function arguments
      * @return  {*}                 the function call result
      */
-    page.evaluate = function (func, args) {
+    defineProperty(page, "evaluate", function evaluate(func, args) {
         var str, arg, argType, i, l;
         if (!(func instanceof Function || typeof func === 'string' || func instanceof String)) {
             throw "Wrong use of WebPage#evaluate";
@@ -387,7 +387,7 @@ function decorateNewPage(opts, page) {
         }
         str = str.replace(/,$/, '') + '); }';
         return this.evaluateJavaScript(str);
-    };
+    });
 
     /**
      * evaluate a function in the page, asynchronously
@@ -397,7 +397,7 @@ function decorateNewPage(opts, page) {
      * @param   {number}    timeMs  time to wait before execution
      * @param   {...}       args    function arguments
      */
-    page.evaluateAsync = function (func, timeMs, args) {
+    defineProperty(page, "evaluateAsync", function evaluateAsync(func, timeMs, args) {
         // Remove the first 2 arguments because we are going to consume them
         var args = Array.prototype.slice.call(arguments, 2),
             numArgsToAppend = args.length,
@@ -418,7 +418,7 @@ function decorateNewPage(opts, page) {
         args.splice(0, 0, funcTimeoutWrapper);
 
         this.evaluate.apply(this, args);
-    };
+    });
 
     /**
      * get cookies of the page
@@ -449,13 +449,13 @@ function decorateNewPage(opts, page) {
      * @param {string}       selector  css selector for the file input element
      * @param {string,array} fileNames the name(s) of the file(s) to upload
      */
-    page.uploadFile = function(selector, fileNames) {
+    defineProperty(page, "uploadFile", function uploadFile(selector, fileNames) {
         if (typeof fileNames == "string") {
             fileNames = [fileNames];
         }
 
         this._uploadFile(selector, fileNames);
-    };
+    });
 
     // Copy options into page
     if (opts) {
@@ -476,7 +476,7 @@ function decorateNewPage(opts, page) {
     // @see https://developer.mozilla.org/en/DOM/window.prompt
     definePageCallbackHandler(page, handlers, "onPrompt", "_getJsPromptCallback");
 
-    page.event = {};
+    defineProperty(page, "event", {});
     page.event.modifier = {
         shift:  0x02000000,
         ctrl:   0x04000000,

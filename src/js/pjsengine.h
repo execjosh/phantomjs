@@ -31,12 +31,16 @@
 #define JS_PJSENGINE_H
 
 #include <QObject>
+#include <QList>
+#include <QPointer>
 #include <QJSEngine>
 #include <QJSValue>
 
 #include "console.h"
 #include "timers.h"
 #include "nativemodules.h"
+
+#include "../webpage.h"
 
 namespace JS
 {
@@ -60,6 +64,7 @@ public slots:
 
     // Module stuff
     QJSValue loadModule(const QString &moduleSource, const QString &filename);
+    QObject *createWebPage();
 
 private:
     bool m_initialized;
@@ -68,6 +73,7 @@ private:
     JS::Console *m_console;
     Timers *m_timers;
     NativeModules *m_nativemodules;
+    QList<QPointer<WebPage> > m_pages;
 };
 
 };

@@ -51,6 +51,8 @@ PJSEngine::PJSEngine(QObject *parent)
 
 PJSEngine::~PJSEngine()
 {
+    qDeleteAll(m_pages);
+    m_pages.clear();
 }
 
 bool PJSEngine::init()
@@ -117,6 +119,8 @@ bool PJSEngine::init()
     phantom.setProperty("_createChildProcess", nativeModules.property("getChildProcess"));
     phantom.setProperty("createFilesystem", nativeModules.property("getFileSystem"));
     phantom.setProperty("createSystem", nativeModules.property("getSystem"));
+    phantom.setProperty("createWebPage", me.property("createWebPage"));
+    phantom.setProperty("defaultPageSettings", m_js->newObject());
     m_js->globalObject().setProperty("phantom", phantom);
 
     m_initialized = true;
@@ -162,6 +166,13 @@ QJSValue PJSEngine::loadModule(const QString &moduleSource, const QString &filen
       "require.cache['" + filename + "']"
       "));";
    return evaluate(scriptSource, filename);
+}
+
+QObject *PJSEngine::createWebPage()
+{
+    WebPage *page = new WebPage(this);
+    m_pages.append(page);
+    return page;
 }
 
 };
